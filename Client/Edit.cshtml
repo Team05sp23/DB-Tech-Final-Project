@@ -1,0 +1,87 @@
+﻿@page
+@model ADT_WebApplication.Pages.Client.EditModel
+@{
+}
+<br />
+<h2>
+    Edit Track
+</h2>
+
+@if (Model.errorMessage.Length > 0)
+{
+    <div class='alert alert-warning alert-dismissible fade show' role='alert'>
+        <strong> @Model.errorMessage</strong>
+        <button type='button' class='btn-close' data-bs-dismiss='alert' arial-label='Close'></button>
+    </div>
+}
+<form method="post">
+    <input type="hidden" name="id" value="@Model.clientInfo.Id" />
+    <div class="row mb-3">
+        <label class="col-sm-3 col-form-label">TrackName</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" name="TrackName" value="@Model.clientInfo.TrackName" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <label class="col-sm-3 col-form-label">AlbumName</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" name="AlbumName" value="@Model.clientInfo.AlbumName" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <label class="col-sm-3 col-form-label">ReleaseDate</label>
+        <div class="col-sm-6">
+            <input type="date" class="form-control" name="ReleaseDate" value="@Model.clientInfo.ReleaseDate" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <label class="col-sm-3 col-form-label">TotalTracks</label>
+        <div class="col-sm-6">
+            <input type="number" class="form-control" name="TotalTracks" value="@Model.clientInfo.TotalTracks" min="1" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <label class="col-sm-3 col-form-label">TrackNumber</label>
+        <div class="col-sm-6">
+            <input type="number" class="form-control" name="TrackNumber" value="@Model.clientInfo.TrackNumber" min="1" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <label class="col-sm-3 col-form-label">ArtistName</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" name="ArtistName" value="@Model.clientInfo.ArtistName" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <label class="col-sm-3 col-form-label">Length</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" name="Length" value="@Model.clientInfo.Length" min="0" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <label class="col-sm-3 col-form-label">Popularity</label>
+        <div class="col-sm-6">
+            <input type="number" class="form-control" name="Popularity" value="@Model.clientInfo.Popularity" min="0" />
+        </div>
+    </div>
+
+    @if (Model.successMessage.Length > 0)
+    {
+        <div class="row mb-3">
+            <div class="col-sm-9">
+                <div class='alert alert-success alert-dismissible fade show' role='alert'>
+                    <strong> @Model.successMessage</strong>
+                    <button type='button' class='btn-close' data-bs-dismiss='alert' arial-label='Close'></button>
+                </div>
+            </div>
+        </div>
+    }
+    <div class="row mb-3">
+        <div class="offset-sm-3 col-sm-3 d-grid">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+        <div class="col-sm-3 d-grid">
+            <a class="btn btn-outline-primary" href="/" role="button">Cancel</a>
+        </div>
+    </div>
+</form>

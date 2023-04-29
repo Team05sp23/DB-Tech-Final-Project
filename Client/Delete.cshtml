@@ -1,0 +1,49 @@
+﻿@page
+@using System.Data.SqlClient;
+@{
+    try
+    {
+        String id = Request.Query["Id"];
+        int trackIdToDelete = Convert.ToInt32(id);
+        string connectionString = "Data Source=.\\sqlexpress;Initial Catalog=Final_ADT;Integrated Security=True";
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+            string sql = @"
+                -- Delete from Artist_Track table
+                DELETE FROM Artist_Track
+                WHERE TrackId = @TrackIdToDelete;
+
+                -- Delete from Track table
+                DELETE FROM Track
+                WHERE TrackId = @TrackIdToDelete;
+
+                -- Delete Albums that are no longer related to any tracks
+                DELETE FROM Album
+                WHERE AlbumId NOT IN (SELECT DISTINCT AlbumId FROM Track);
+
+                -- Delete Artists that are no longer related to any tracks or albums
+                DELETE FROM Artist
+                WHERE ArtistId NOT IN (SELECT DISTINCT ArtistId FROM Album)
+                AND ArtistId NOT IN (SELECT DISTINCT ArtistId FROM Artist_Track);
+            ";
+
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                command.Parameters.AddWithValue("@TrackIdToDelete", trackIdToDelete);
+                int rowsAffected = command.ExecuteNonQuery();
+                Console.WriteLine($"Rows affected: {rowsAffected}");
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        TempData["ErrorMessage"] = $"Error: {ex.Message}";
+        if (ex.InnerException != null)
+        {
+            TempData["ErrorMessage"] += $"\nInnerException: {ex.InnerException.Message}";
+        }
+        Console.WriteLine($"Error: {ex.Message}");
+    }
+    Response.Redirect("/Client/Index");
+}

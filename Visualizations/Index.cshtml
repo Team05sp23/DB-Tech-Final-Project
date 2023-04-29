@@ -1,0 +1,214 @@
+﻿@page
+@model ADT_WebApplication.Pages.Visualizations.IndexModel
+@{
+}
+
+<div class="container">
+    <br>
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @Model.ErrorMessage
+        </div>
+    }
+    <h2>Visualizations</h2>
+</div>
+<div class="row mt-5">
+    <div class="col-md-6">
+        <canvas id="PopularityChart"></canvas>
+    </div>
+    <div class="col-md-6">
+        <canvas id="AlbumTrackCountChart"></canvas>
+    </div>
+</div>
+<div class="row mt-5">
+    <div class="col-md-12">
+        <canvas id="PopularityByReleaseDateChart"></canvas>
+    </div>
+</div>
+<div class="row mt-5">
+    <div class="col-md-6">
+        <canvas id="AverageTrackLengthChart"></canvas>
+    </div>
+</div>
+<div class="row mt-5">
+    <div class="col-md-6">
+        <canvas id="TracksPerGenreChart"></canvas>
+    </div>
+    <div class="col-md-6">
+        <canvas id="AlbumsPerArtistChart"></canvas>
+    </div>
+</div>
+<div class="row mt-5">
+    <div class="col-md-12">
+        <canvas id="AveragePopularityPerArtistChart"></canvas>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var artistNames = @Html.Raw(Json.Serialize(Model.listClient.Select(c => c.ArtistName).Distinct().ToList()));
+        var albumNames = @Html.Raw(Json.Serialize(Model.listClient.Select(c => c.AlbumName).Distinct().ToList()));
+        var releaseDates = @Html.Raw(Json.Serialize(Model.listClient.Select(c => c.ReleaseDate.ToString("yyyy-MM-dd")).Distinct().ToList()));
+        var listClient = @Html.Raw(Json.Serialize(Model.listClient));
+
+        var popularityByArtist = [];
+        var trackCountByAlbum = [];
+        var popularityByReleaseDate = [];
+
+
+        for (const artist of artistNames) {
+            let artistTracks = listClient.filter(c => c.artistName === artist);
+            let totalPopularity = artistTracks.reduce((sum, track) => sum + track.popularity, 0);
+            popularityByArtist.push(totalPopularity);
+        }
+
+        for (const album of albumNames) {
+            let albumTracks = listClient.filter(c => c.albumName === album);
+            trackCountByAlbum.push(albumTracks.length);
+        }
+
+        for (const date of releaseDates) {
+            let tracksOnDate = listClient.filter(c => c.releaseDate === date);
+            let totalPopularity = tracksOnDate.reduce((sum, track) => sum + track.popularity, 0);
+            popularityByReleaseDate.push(totalPopularity);
+        }
+
+
+        var ctxPopularity = document.getElementById('PopularityChart').getContext('2d');
+        var PopularityChart = new Chart(ctxPopularity, {
+            type: 'bar',
+            data: {
+                labels: artistNames,
+                datasets: [{
+                    label: 'Popularity',
+                    data: popularityByArtist,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        var ctxAlbum = document.getElementById('AlbumTrackCountChart').getContext('2d');
+        var AlbumTrackCountChart = new Chart(ctxAlbum, {
+            type: 'pie',
+            data: {
+                labels: albumNames,
+                datasets: [{
+                    data: trackCountByAlbum,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            }
+        });
+
+        var ctxReleaseDate = document.getElementById('PopularityByReleaseDateChart').getContext('2d');
+        var PopularityByReleaseDateChart = new Chart(ctxReleaseDate, {
+            type: 'line',
+            data: {
+                labels: releaseDates,
+                datasets: [{
+                    label: 'Popularity',
+                    data: popularityByReleaseDate,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    },
+                    x: {
+                        type: 'time',
+                        distribution: 'linear'
+                    }
+                }
+            }
+        });
+        var averageTrackLengthByArtist = [];
+
+        for (const artist of artistNames) {
+            let artistTracks = listClient.filter(c => c.ArtistName === artist);
+            let totalLength = artistTracks.reduce((sum, track) => sum + track.Length, 0);
+            averageTrackLengthByArtist.push(totalLength / artistTracks.length);
+        }
+
+        // ...previous chart definitions...
+
+        var ctxAverageTrackLength = document.getElementById('AverageTrackLengthChart').getContext('2d');
+        var AverageTrackLengthChart = new Chart(ctxAverageTrackLength, {
+            type: 'bar',
+            data: {
+                labels: artistNames,
+                datasets: [{
+                    label: 'Average Track Length',
+                    data: averageTrackLengthByArtist,
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        var ctxPopularityByReleaseDate = document.getElementById('PopularityByReleaseDateChart').getContext('2d');
+        var PopularityByReleaseDateChart = new Chart(ctxPopularityByReleaseDate, {
+            type: 'line',
+            data: {
+                labels: releaseDates,
+                datasets: [{
+                    label: 'Popularity',
+                    data: popularityByReleaseDate,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    },
+                    x: {
+                        type: 'time',
+                        distribution: 'linear'
+                    }
+                }
+            }
+        });
+    </script>
+}
+
+
